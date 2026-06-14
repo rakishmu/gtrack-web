@@ -13,8 +13,12 @@ import EventsDrawer from './EventsDrawer';
 import useFilter from './useFilter';
 import MainToolbar from './MainToolbar';
 import { useAttributePreference } from '../common/util/preferences';
+import AppHeader from '../common/components/AppHeader';
+import GlobalStyles from '@mui/material/GlobalStyles';
 
 const MainMap = lazy(() => import('./MainMap'));
+
+const TEAL = 'linear-gradient(135deg,#1E8C86 0%,#2BA8A2 60%,#3CC4BD 100%)';
 
 const useStyles = makeStyles()((theme) => ({
   root: {
@@ -61,6 +65,10 @@ const useStyles = makeStyles()((theme) => ({
     zIndex: 4,
     display: 'flex',
     minHeight: 0,
+    backgroundColor: '#ffffff',
+  '& .MuiListItemText-primary': { color: '#1E3A3A' },
+  '& .MuiListItemButton-root:hover': { backgroundColor: 'rgba(43,168,162,0.06)' },
+  '& .MuiListItemButton-root.Mui-selected': { backgroundColor: 'rgba(43,168,162,0.12)' },
   },
 }));
 
@@ -91,7 +99,7 @@ const MainPage = () => {
   const [filterSort, setFilterSort] = usePersistedState('filterSort', '');
   const [filterMap, setFilterMap] = usePersistedState('filterMap', false);
 
-  const [devicesOpen, setDevicesOpen] = useState(desktop);
+  const [devicesOpen, setDevicesOpen] = useState(false);
   const [eventsOpen, setEventsOpen] = useState(false);
 
   const onEventsClick = useCallback(() => setEventsOpen(true), [setEventsOpen]);
@@ -114,6 +122,12 @@ const MainPage = () => {
 
   return (
     <div className={classes.root}>
+      <GlobalStyles
+        styles={{
+          '.maplibregl-ctrl-top-right': { marginTop: '62px' },
+        }}
+      />
+      <AppHeader />
       {desktop && (
         <Suspense fallback={null}>
           <MainMap
@@ -124,7 +138,15 @@ const MainPage = () => {
         </Suspense>
       )}
       <div className={classes.sidebar}>
-        <Paper square elevation={3} className={classes.header}>
+        <Paper
+          square
+          elevation={3}
+          className={classes.header}
+          sx={{
+            mt: { xs: '56px', sm: '53px' },
+            background: 'linear-gradient(135deg,#1E8C86 0%,#2BA8A2 60%,#3CC4BD 100%)',
+          }}
+        >
           <MainToolbar
             filteredDevices={filteredDevices}
             devicesOpen={devicesOpen}

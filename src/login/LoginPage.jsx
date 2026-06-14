@@ -11,6 +11,7 @@ import {
   IconButton,
   Tooltip,
   InputAdornment,
+  Box,
 } from '@mui/material';
 import CountryFlag from 'react-country-flag';
 import { makeStyles } from 'tss-react/mui';
@@ -36,6 +37,7 @@ import LogoImage from './LogoImage';
 import { useCatch } from '../reactHelper';
 import QrCodeDialog from '../common/components/QrCodeDialog';
 import fetchOrThrow from '../common/util/fetchOrThrow';
+import logo from '../../public/logo.webp';
 
 const useStyles = makeStyles()((theme) => ({
   options: {
@@ -68,6 +70,22 @@ const useStyles = makeStyles()((theme) => ({
     marginRight: theme.spacing(1),
   },
 }));
+
+const fieldSx = {
+  '& .MuiOutlinedInput-root': { backgroundColor: '#fff', borderRadius: 1.5 },
+  '& .MuiInputBase-input': { color: '#1E3A3A' },
+  '& .MuiInputLabel-root': { color: 'rgba(0,0,0,0.55)' },
+  '& .MuiInputLabel-root.Mui-focused': { color: '#000000' },
+  '& .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(0,0,0,0.15)' },
+  '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(0,0,0,0.3)' },
+  '& .Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: '#ffffff' },
+  // tambal autofill (penyebab umum "field hitam")
+  '& input:-webkit-autofill': {
+    WebkitBoxShadow: '0 0 0 100px #fff inset',
+    WebkitTextFillColor: '#ffffff',
+    caretColor: '#ffffff',
+  },
+};
 
 const LoginPage = () => {
   const { classes } = useStyles();
@@ -199,6 +217,14 @@ const LoginPage = () => {
         )}
       </div>
       <div className={classes.container}>
+        <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+          <Box
+            component="img"
+            src={logo}
+            alt="Logo"
+            sx={{ height: 290, objectFit: 'contain' }}
+          />
+        </Box>
         {useMediaQuery(theme.breakpoints.down('lg')) && (
           <LogoImage color={theme.palette.primary.main} />
         )}
@@ -214,6 +240,7 @@ const LoginPage = () => {
               autoFocus={!email}
               onChange={(e) => setEmail(e.target.value)}
               helperText={failed && 'Invalid username or password'}
+              sx={fieldSx}
             />
             <TextField
               required
@@ -240,6 +267,7 @@ const LoginPage = () => {
                   ),
                 },
               }}
+              sx={fieldSx}
             />
             {codeEnabled && (
               <TextField
@@ -256,8 +284,20 @@ const LoginPage = () => {
               onClick={handlePasswordLogin}
               type="submit"
               variant="contained"
-              color="secondary"
+              disableElevation
               disabled={!email || !password || (codeEnabled && !code)}
+              sx={{
+                mt: 1,
+                backgroundColor: '#ffffff !important',
+                color: '#1E8C86',
+                fontWeight: 700,
+                boxShadow: 'none',
+                '&:hover': { backgroundColor: '#f0f0f0', boxShadow: 'none' },
+                '&.Mui-disabled': {
+                  backgroundColor: 'rgba(255,255,255,0.6)',
+                  color: 'rgba(30,140,134,0.5)',
+                },
+              }}
             >
               {t('loginLogin')}
             </Button>

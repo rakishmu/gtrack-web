@@ -9,7 +9,9 @@ import {
   MenuItem,
   Typography,
   Badge,
+  Button,
 } from '@mui/material';
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 
 import DescriptionIcon from '@mui/icons-material/Description';
 import SettingsIcon from '@mui/icons-material/Settings';
@@ -21,6 +23,8 @@ import { sessionActions } from '../../store';
 import { useTranslation } from './LocalizationProvider';
 import { useRestriction } from '../util/permissions';
 import { nativePostMessage } from './NativeInterface';
+
+const DASHBOARD_URL = import.meta.env.VITE_DASHBOARD_URL ?? 'http://localhost:5173';
 
 const BottomMenu = () => {
   const navigate = useNavigate();
@@ -95,22 +99,26 @@ const BottomMenu = () => {
       case 'map':
         navigate('/');
         break;
-      case 'reports': {
-        let id = selectedDeviceId;
-        if (id == null) {
-          const deviceIds = Object.keys(devices);
-          if (deviceIds.length === 1) {
-            id = deviceIds[0];
-          }
-        }
-
-        if (id != null) {
-          navigate(`/reports/combined?deviceId=${id}`);
-        } else {
-          navigate('/reports/combined');
-        }
+      case 'reports':
+        (window.top ?? window).location.href = DASHBOARD_URL;
         break;
-      }
+
+      // case 'reports': {
+      //   let id = selectedDeviceId;
+      //   if (id == null) {
+      //     const deviceIds = Object.keys(devices);
+      //     if (deviceIds.length === 1) {
+      //       id = deviceIds[0];
+      //     }
+      //   }
+
+      //   if (id != null) {
+      //     navigate(`/reports/combined?deviceId=${id}`);
+      //   } else {
+      //     navigate('/reports/combined');
+      //   }
+      //   break;
+      // }
       case 'settings':
         navigate('/settings/preferences?menu=true');
         break;
@@ -124,10 +132,23 @@ const BottomMenu = () => {
         break;
     }
   };
+  const goToContent = () => {
+    (window.top ?? window).location.href = DASHBOARD_URL;
+  }
 
   return (
-    <Paper square elevation={3}>
-      <BottomNavigation value={currentSelection()} onChange={handleSelection} showLabels>
+    <Paper square elevation={3} sx={{ background: 'linear-gradient(135deg,#1E8C86 0%,#2BA8A2 60%,#3CC4BD 100%)' }}>
+      <BottomNavigation
+          value={currentSelection()}
+          onChange={handleSelection}
+          showLabels
+          sx={{
+            background: 'transparent',
+            '& .MuiBottomNavigationAction-root': { color: 'rgba(255,255,255,0.75)' },
+            '& .MuiBottomNavigationAction-root.Mui-selected': { color: '#fff' },
+            '& .MuiBottomNavigationAction-label.Mui-selected': { fontWeight: 700 },
+          }}
+        >
         <BottomNavigationAction
           label={t('mapTitle')}
           icon={
@@ -137,7 +158,17 @@ const BottomMenu = () => {
           }
           value="map"
         />
-        {!disableReports && (
+        <BottomNavigationAction
+          label={t('reportTitle')}
+          icon={<DescriptionIcon />}
+          value="reports"
+        />
+        <BottomNavigationAction
+          label='Call Center'
+          icon={<PersonIcon />}
+          value="reports"
+        />
+        {/* {!disableReports && (
           <BottomNavigationAction
             label={t('reportTitle')}
             icon={<DescriptionIcon />}
@@ -159,7 +190,7 @@ const BottomMenu = () => {
           />
         ) : (
           <BottomNavigationAction label={t('settingsUser')} icon={<PersonIcon />} value="account" />
-        )}
+        )} */}
       </BottomNavigation>
       <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={() => setAnchorEl(null)}>
         <MenuItem onClick={handleAccount}>
