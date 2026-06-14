@@ -93,17 +93,24 @@ const MainToolbar = ({
               <Badge
                 color="info"
                 variant="dot"
-                invisible={
-                  !filter.statuses.length && !filter.groups.length && !filter.geofences.length
-                }
+                invisible={!filter.statuses.length && !filter.groups.length && !filter.geofences.length}
               >
-                <TuneIcon fontSize="small" />
+                <TuneIcon fontSize="small" 
+                  sx={{
+                    color: '#020000',
+                  }}
+                />
               </Badge>
             </IconButton>
           </InputAdornment>
         }
         size="small"
         fullWidth
+        sx={{
+          backgroundColor: '#fff',
+          borderRadius: 1.5,
+          '& .MuiInputBase-input': { color: '#1E3A3A !important' }, 
+        }}
       />
       <Popover
         open={!!devicesAnchorEl && !devicesOpen}
