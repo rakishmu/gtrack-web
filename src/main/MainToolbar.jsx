@@ -95,7 +95,11 @@ const MainToolbar = ({
                 variant="dot"
                 invisible={!filter.statuses.length && !filter.groups.length && !filter.geofences.length}
               >
-                <TuneIcon fontSize="small" />
+                <TuneIcon fontSize="small" 
+                  sx={{
+                    color: '#020000',
+                  }}
+                />
               </Badge>
             </IconButton>
           </InputAdornment>
