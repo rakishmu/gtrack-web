@@ -18,8 +18,6 @@ import GlobalStyles from '@mui/material/GlobalStyles';
 
 const MainMap = lazy(() => import('./MainMap'));
 
-const TEAL = 'linear-gradient(135deg,#1E8C86 0%,#2BA8A2 60%,#3CC4BD 100%)';
-
 const useStyles = makeStyles()((theme) => ({
   root: {
     height: '100%',
@@ -66,9 +64,9 @@ const useStyles = makeStyles()((theme) => ({
     display: 'flex',
     minHeight: 0,
     backgroundColor: '#ffffff',
-  '& .MuiListItemText-primary': { color: '#1E3A3A' },
-  '& .MuiListItemButton-root:hover': { backgroundColor: 'rgba(43,168,162,0.06)' },
-  '& .MuiListItemButton-root.Mui-selected': { backgroundColor: 'rgba(43,168,162,0.12)' },
+    '& .MuiListItemText-primary': { color: '#1E3A3A' },
+    '& .MuiListItemButton-root:hover': { backgroundColor: 'rgba(43,168,162,0.06)' },
+    '& .MuiListItemButton-root.Mui-selected': { backgroundColor: 'rgba(43,168,162,0.12)' },
   },
 }));
 
@@ -78,7 +76,6 @@ const MainPage = () => {
   const theme = useTheme();
 
   const desktop = useMediaQuery(theme.breakpoints.up('md'));
-
   const mapOnSelect = useAttributePreference('mapOnSelect', true);
 
   const selectedDeviceId = useSelector((state) => state.devices.selectedId);
@@ -89,7 +86,6 @@ const MainPage = () => {
   );
 
   const [filteredDevices, setFilteredDevices] = useState([]);
-
   const [keyword, setKeyword] = useState('');
   const [filter, setFilter] = usePersistedState('deviceFilter', {
     statuses: [],
@@ -101,6 +97,9 @@ const MainPage = () => {
 
   const [devicesOpen, setDevicesOpen] = useState(false);
   const [eventsOpen, setEventsOpen] = useState(false);
+
+  // State utama penampung ID Wilayah (Default 0 = Lolos Semua)
+  const [selectedRegionId, setSelectedRegionId] = useState(0);
 
   const onEventsClick = useCallback(() => setEventsOpen(true), [setEventsOpen]);
 
@@ -118,6 +117,7 @@ const MainPage = () => {
     positions,
     setFilteredDevices,
     setFilteredPositions,
+    Number(selectedRegionId) || 0,
   );
 
   return (
@@ -127,7 +127,8 @@ const MainPage = () => {
           '.maplibregl-ctrl-top-right': { marginTop: '62px' },
         }}
       />
-      <AppHeader />
+      <AppHeader onRegionChange={setSelectedRegionId} />
+      
       {desktop && (
         <Suspense fallback={null}>
           <MainMap

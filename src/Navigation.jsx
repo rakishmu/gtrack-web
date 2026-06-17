@@ -63,6 +63,9 @@ const EmulatorPage = lazy(() => import('./other/EmulatorPage'));
 const StreamPage = lazy(() => import('./other/StreamPage'));
 const AuditPage = lazy(() => import('./reports/AuditPage'));
 
+const CommandCenterPage = lazy(() => import('./command/CommandPage'));
+const UserManagementPage = lazy(() => import('./users/UsersPage'));
+
 const Navigation = () => {
   const dispatch = useDispatch();
   const { setLocalLanguage } = useLocalization();
@@ -136,6 +139,10 @@ const Navigation = () => {
           <Route path="geofences" element={<GeofencesPage />} />
           <Route path="emulator" element={<EmulatorPage />} />
           <Route path="stream" element={<StreamPage />} />
+
+          {/* Halaman kustom Kementan */}
+          <Route path="command" element={<CommandCenterPage />} />
+          <Route path="users" element={<UserManagementPage />} />
 
           <Route path="settings">
             <Route path=":type/:id/share" element={<SharePage />} />

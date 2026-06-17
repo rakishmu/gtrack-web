@@ -18,6 +18,9 @@ import SettingsIcon from '@mui/icons-material/Settings';
 import MapIcon from '@mui/icons-material/Map';
 import PersonIcon from '@mui/icons-material/Person';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
+import SmsIcon from '@mui/icons-material/Sms';
+import GroupIcon from '@mui/icons-material/Group';
+import DashboardIcon from '@mui/icons-material/Dashboard';
 
 import { sessionActions } from '../../store';
 import { useTranslation } from './LocalizationProvider';
@@ -54,6 +57,8 @@ const BottomMenu = () => {
     if (location.pathname === '/') {
       return 'map';
     }
+    if (location.pathname.startsWith('/command')) return 'command';
+    if (location.pathname.startsWith('/users')) return 'users';
     return null;
   };
 
@@ -99,26 +104,30 @@ const BottomMenu = () => {
       case 'map':
         navigate('/');
         break;
-      case 'reports':
+      case 'dashboard':
         (window.top ?? window).location.href = DASHBOARD_URL;
         break;
-
-      // case 'reports': {
-      //   let id = selectedDeviceId;
-      //   if (id == null) {
-      //     const deviceIds = Object.keys(devices);
-      //     if (deviceIds.length === 1) {
-      //       id = deviceIds[0];
-      //     }
-      //   }
-
-      //   if (id != null) {
-      //     navigate(`/reports/combined?deviceId=${id}`);
-      //   } else {
-      //     navigate('/reports/combined');
-      //   }
-      //   break;
-      // }
+      case 'command':
+        navigate('/command');
+        break;
+      case 'users':
+        navigate('/users');
+        break;
+      case 'reports': {
+        let id = selectedDeviceId;
+        if (id == null) {
+          const deviceIds = Object.keys(devices);
+          if (deviceIds.length === 1) {
+            id = deviceIds[0];
+          }
+        }
+        if (id != null) {
+          navigate(`/reports/combined?deviceId=${id}`);
+        } else {
+          navigate('/reports/combined');
+        }
+        break;
+      }
       case 'settings':
         navigate('/settings/preferences?menu=true');
         break;
@@ -139,16 +148,32 @@ const BottomMenu = () => {
   return (
     <Paper square elevation={3} sx={{ background: 'linear-gradient(135deg,#1E8C86 0%,#2BA8A2 60%,#3CC4BD 100%)' }}>
       <BottomNavigation
-          value={currentSelection()}
-          onChange={handleSelection}
-          showLabels
-          sx={{
-            background: 'transparent',
-            '& .MuiBottomNavigationAction-root': { color: 'rgba(255,255,255,0.75)' },
-            '& .MuiBottomNavigationAction-root.Mui-selected': { color: '#fff' },
-            '& .MuiBottomNavigationAction-label.Mui-selected': { fontWeight: 700 },
-          }}
-        >
+        value={currentSelection()}
+        onChange={handleSelection}
+        showLabels
+        sx={{
+          background: 'transparent',
+          width: '100%',
+          '& .MuiBottomNavigationAction-root': { 
+            color: 'rgba(255,255,255,0.75)',
+            minWidth: 'auto',
+            padding: '6px 2px',
+          },
+          '& .MuiBottomNavigationAction-root.Mui-selected': { 
+            color: '#fff' 
+          },
+          '& .MuiBottomNavigationAction-label': {
+            fontSize: '11px',
+            '&.Mui-selected': { 
+              fontWeight: 700,
+              fontSize: '11px',
+            },
+          },
+          '& .MuiSvgIcon-root': {
+            fontSize: '20px',
+          }
+        }}
+      >
         <BottomNavigationAction
           label={t('mapTitle')}
           icon={
@@ -160,13 +185,28 @@ const BottomMenu = () => {
         />
         <BottomNavigationAction
           label={t('reportTitle')}
+          icon={<DashboardIcon />}
+          value="dashboard"
+        />
+        <BottomNavigationAction
+          label='Command'
+          icon={<SmsIcon />}
+          value="command"
+        />
+        <BottomNavigationAction
+          label='Users'
+          icon={<GroupIcon />}
+          value="users"
+        />
+        <BottomNavigationAction
+          label='Reports'
           icon={<DescriptionIcon />}
           value="reports"
         />
         <BottomNavigationAction
-          label='Call Center'
-          icon={<PersonIcon />}
-          value="reports"
+          label={t('loginLogout')}
+          icon={<ExitToAppIcon />}
+          value="logout"
         />
         {/* {!disableReports && (
           <BottomNavigationAction
