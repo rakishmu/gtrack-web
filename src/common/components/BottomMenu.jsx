@@ -18,6 +18,8 @@ import SettingsIcon from '@mui/icons-material/Settings';
 import MapIcon from '@mui/icons-material/Map';
 import PersonIcon from '@mui/icons-material/Person';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
+import SmsIcon from '@mui/icons-material/Sms';
+import GroupIcon from '@mui/icons-material/Group';
 
 import { sessionActions } from '../../store';
 import { useTranslation } from './LocalizationProvider';
@@ -54,6 +56,8 @@ const BottomMenu = () => {
     if (location.pathname === '/') {
       return 'map';
     }
+    if (location.pathname.startsWith('/command')) return 'command';
+    if (location.pathname.startsWith('/users')) return 'users';
     return null;
   };
 
@@ -102,7 +106,12 @@ const BottomMenu = () => {
       case 'reports':
         (window.top ?? window).location.href = DASHBOARD_URL;
         break;
-
+      case 'command':
+        navigate('/command');
+        break;
+      case 'users':
+        navigate('/users');
+        break;
       // case 'reports': {
       //   let id = selectedDeviceId;
       //   if (id == null) {
@@ -164,9 +173,19 @@ const BottomMenu = () => {
           value="reports"
         />
         <BottomNavigationAction
-          label='Call Center'
-          icon={<PersonIcon />}
-          value="reports"
+          label='Command'
+          icon={<SmsIcon />}
+          value="command"
+        />
+        <BottomNavigationAction
+          label='Users'
+          icon={<GroupIcon />}
+          value="users"
+        />
+        <BottomNavigationAction
+          label={t('loginLogout')}
+          icon={<ExitToAppIcon />}
+          value="logout"
         />
         {/* {!disableReports && (
           <BottomNavigationAction
