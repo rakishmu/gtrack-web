@@ -20,6 +20,7 @@ import PersonIcon from '@mui/icons-material/Person';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 import SmsIcon from '@mui/icons-material/Sms';
 import GroupIcon from '@mui/icons-material/Group';
+import DashboardIcon from '@mui/icons-material/Dashboard';
 
 import { sessionActions } from '../../store';
 import { useTranslation } from './LocalizationProvider';
@@ -103,7 +104,7 @@ const BottomMenu = () => {
       case 'map':
         navigate('/');
         break;
-      case 'reports':
+      case 'dashboard':
         (window.top ?? window).location.href = DASHBOARD_URL;
         break;
       case 'command':
@@ -112,22 +113,21 @@ const BottomMenu = () => {
       case 'users':
         navigate('/users');
         break;
-      // case 'reports': {
-      //   let id = selectedDeviceId;
-      //   if (id == null) {
-      //     const deviceIds = Object.keys(devices);
-      //     if (deviceIds.length === 1) {
-      //       id = deviceIds[0];
-      //     }
-      //   }
-
-      //   if (id != null) {
-      //     navigate(`/reports/combined?deviceId=${id}`);
-      //   } else {
-      //     navigate('/reports/combined');
-      //   }
-      //   break;
-      // }
+      case 'reports': {
+        let id = selectedDeviceId;
+        if (id == null) {
+          const deviceIds = Object.keys(devices);
+          if (deviceIds.length === 1) {
+            id = deviceIds[0];
+          }
+        }
+        if (id != null) {
+          navigate(`/reports/combined?deviceId=${id}`);
+        } else {
+          navigate('/reports/combined');
+        }
+        break;
+      }
       case 'settings':
         navigate('/settings/preferences?menu=true');
         break;
@@ -148,16 +148,32 @@ const BottomMenu = () => {
   return (
     <Paper square elevation={3} sx={{ background: 'linear-gradient(135deg,#1E8C86 0%,#2BA8A2 60%,#3CC4BD 100%)' }}>
       <BottomNavigation
-          value={currentSelection()}
-          onChange={handleSelection}
-          showLabels
-          sx={{
-            background: 'transparent',
-            '& .MuiBottomNavigationAction-root': { color: 'rgba(255,255,255,0.75)' },
-            '& .MuiBottomNavigationAction-root.Mui-selected': { color: '#fff' },
-            '& .MuiBottomNavigationAction-label.Mui-selected': { fontWeight: 700 },
-          }}
-        >
+        value={currentSelection()}
+        onChange={handleSelection}
+        showLabels
+        sx={{
+          background: 'transparent',
+          width: '100%',
+          '& .MuiBottomNavigationAction-root': { 
+            color: 'rgba(255,255,255,0.75)',
+            minWidth: 'auto',
+            padding: '6px 2px',
+          },
+          '& .MuiBottomNavigationAction-root.Mui-selected': { 
+            color: '#fff' 
+          },
+          '& .MuiBottomNavigationAction-label': {
+            fontSize: '11px',
+            '&.Mui-selected': { 
+              fontWeight: 700,
+              fontSize: '11px',
+            },
+          },
+          '& .MuiSvgIcon-root': {
+            fontSize: '20px',
+          }
+        }}
+      >
         <BottomNavigationAction
           label={t('mapTitle')}
           icon={
@@ -169,8 +185,8 @@ const BottomMenu = () => {
         />
         <BottomNavigationAction
           label={t('reportTitle')}
-          icon={<DescriptionIcon />}
-          value="reports"
+          icon={<DashboardIcon />}
+          value="dashboard"
         />
         <BottomNavigationAction
           label='Command'
@@ -181,6 +197,11 @@ const BottomMenu = () => {
           label='Users'
           icon={<GroupIcon />}
           value="users"
+        />
+        <BottomNavigationAction
+          label='Reports'
+          icon={<DescriptionIcon />}
+          value="reports"
         />
         <BottomNavigationAction
           label={t('loginLogout')}
