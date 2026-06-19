@@ -49,11 +49,13 @@ const AppHeader = ({ onRegionChange }) => {
   const allGroups = Object.values(groupItems);
   const live = socket !== false;
 
+    const [tahun, setTahun] = useState('');
   const [provinsi, setProvinsi] = useState('');
   const [kabupaten, setKabupaten] = useState('');
   const [kecamatan, setKecamatan] = useState('');
   const [kelurahan, setKelurahan] = useState('');
 
+  const listTahun = ['2025', '2016']
   const listProvinsi = allGroups.filter((g) => !g.groupId || g.groupId === 0);
   const listKabupaten = allGroups.filter((g) => g.groupId === Number(provinsi));
   const listKecamatan = allGroups.filter((g) => g.groupId === Number(kabupaten));
@@ -119,12 +121,13 @@ const AppHeader = ({ onRegionChange }) => {
 
         {/* Kanan: dropdown wilayah + LIVE */}
         <Box sx={{ position: 'relative', zIndex: 1, ml: 'auto', display: 'flex', alignItems: 'center', gap: 1.5 }}>
-          <Box sx={{ display: { xs: 'none', lg: 'flex' }, gap: 1.5 }}>
+          {/* <Box sx={{ display: { xs: 'none', lg: 'flex' }, gap: 1.5 }}>
+            <RegionSelect label="Tahun" value={tahun} items={listTahun} onChange={(e) => handleRegionChange('provinsi', e.target.value)} />
             <RegionSelect label="Provinsi" value={provinsi} items={listProvinsi} onChange={(e) => handleRegionChange('provinsi', e.target.value)} />
             <RegionSelect label="Kabupaten" value={kabupaten} items={listKabupaten} disabled={!provinsi} onChange={(e) => handleRegionChange('kabupaten', e.target.value)} />
             <RegionSelect label="Kecamatan" value={kecamatan} items={listKecamatan} disabled={!kabupaten} onChange={(e) => handleRegionChange('kecamatan', e.target.value)} />
             <RegionSelect label="Kelurahan" value={kelurahan} items={listKelurahan} disabled={!kecamatan} onChange={(e) => handleRegionChange('kelurahan', e.target.value)} />
-          </Box>
+          </Box> */}
 
           <Box
             sx={{
