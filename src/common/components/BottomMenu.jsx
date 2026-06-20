@@ -27,7 +27,7 @@ import { useTranslation } from './LocalizationProvider';
 import { useRestriction } from '../util/permissions';
 import { nativePostMessage } from './NativeInterface';
 
-const DASHBOARD_URL ='http://103.228.8.184:8015';
+const DASHBOARD_URL ='https://dashboard.garudatrack.id';
 
 const BottomMenu = () => {
   const navigate = useNavigate();

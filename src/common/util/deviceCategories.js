@@ -19,4 +19,11 @@ export default [
   'truck',
   'van',
   'scooter',
+  'tractor2wheel',
+  'waterpump',
+  'tractor4wheel',
+  'tractorcrawler',
+  'combineharvester',
+  'ricetransplanter',
+  'agridrone',
 ];
