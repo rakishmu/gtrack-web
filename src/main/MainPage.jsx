@@ -87,11 +87,22 @@ const MainPage = () => {
 
   const [filteredDevices, setFilteredDevices] = useState([]);
   const [keyword, setKeyword] = useState('');
+  // const [filter, setFilter] = usePersistedState('deviceFilter', {
+  //   statuses: [],
+  //   groups: [],
+  //   geofences: [],
+  // });
   const [filter, setFilter] = usePersistedState('deviceFilter', {
-    statuses: [],
-    groups: [],
-    geofences: [],
-  });
+  statuses: [],
+  groups: [],
+  geofences: [],
+  tahun: [],
+  jenis: [],
+  provinsi: [],
+  kabupaten: [],
+  kecamatan: [],
+  kelurahan: [],
+});
   const [filterSort, setFilterSort] = usePersistedState('filterSort', '');
   const [filterMap, setFilterMap] = usePersistedState('filterMap', false);
 

@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -14,9 +14,10 @@ import {
   FormGroup,
   FormControlLabel,
   Checkbox,
+  ListItemText,
   Badge,
   ListItemButton,
-  ListItemText,
+  ListItemText as MuiListItemText,
   Tooltip,
 } from '@mui/material';
 import { makeStyles } from 'tss-react/mui';
@@ -29,6 +30,8 @@ import { useTranslation } from '../common/components/LocalizationProvider';
 import { useDeviceReadonly } from '../common/util/permissions';
 import DeviceRow from './DeviceRow';
 
+const API_BASE = 'https://api.garudatrack.id';
+
 const useStyles = makeStyles()((theme) => ({
   toolbar: {
     display: 'flex',
@@ -40,8 +43,21 @@ const useStyles = makeStyles()((theme) => ({
     padding: theme.spacing(2),
     gap: theme.spacing(2),
     width: theme.dimensions.drawerWidthTablet,
+    maxHeight: '70vh',
+    overflowY: 'auto',
   },
 }));
+
+const getYearOptions = (startYear = 2024, endYear = new Date().getFullYear()) => {
+  const years = [];
+  for (let y = startYear; y <= endYear; y += 1) {
+    years.push(String(y));
+  }
+  return years;
+};
+
+// Helper: selalu kembalikan array, apapun input-nya (undefined, string, array)
+const asArray = (value) => (Array.isArray(value) ? value : []);
 
 const MainToolbar = ({
   filteredDevices,
@@ -75,6 +91,116 @@ const MainToolbar = ({
   const deviceStatusCount = (status) =>
     Object.values(devices).filter((d) => d.status === status).length;
 
+  // Normalisasi field region/array supaya selalu array, dipakai di seluruh komponen
+  const filterTahun = asArray(filter.tahun);
+  const filterJenis = asArray(filter.jenis);
+  const filterProvinsi = asArray(filter.provinsi);
+  const filterKabupaten = asArray(filter.kabupaten);
+  const filterKecamatan = asArray(filter.kecamatan);
+  const filterKelurahan = asArray(filter.kelurahan);
+
+  // -- Tahun: statis 2024 s/d tahun berjalan --
+  const tahunOptions = useMemo(() => getYearOptions(2024), []);
+
+  // -- Jenis Alsintan: dari API --
+  const [jenisOptions, setJenisOptions] = useState([]);
+  useEffect(() => {
+    fetch(`${API_BASE}/cards/jenisalsintan`)
+      .then((res) => res.json())
+      .then((data) => {
+        setJenisOptions(
+          (data || [])
+            .map((item) => item.vehicle_name)
+            .sort((a, b) => a.localeCompare(b)),
+        );
+      })
+      .catch(() => setJenisOptions([]));
+  }, []);
+
+  // -- Provinsi: dari API --
+  const [provinsiOptions, setProvinsiOptions] = useState([]);
+  useEffect(() => {
+    fetch(`${API_BASE}/cluster/getprovince`)
+      .then((res) => res.json())
+      .then((data) => setProvinsiOptions(Array.isArray(data) ? data : []))
+      .catch(() => setProvinsiOptions([]));
+  }, []);
+
+  // -- Kabupaten: cascading dari Provinsi terpilih --
+  const [kabupatenOptions, setKabupatenOptions] = useState([]);
+  useEffect(() => {
+    if (filterProvinsi.length !== 1) {
+      // API butuh 1 provinsi spesifik di path; kalau 0 atau >1 dipilih, kosongkan opsi
+      setKabupatenOptions([]);
+      return;
+    }
+    fetch(`${API_BASE}/cluster/getregency/${encodeURIComponent(filterProvinsi[0])}/`)
+      .then((res) => res.json())
+      .then((data) => setKabupatenOptions(Array.isArray(data) ? data : []))
+      .catch(() => setKabupatenOptions([]));
+  }, [filter.provinsi]);
+
+  // -- Kecamatan: cascading dari Provinsi + Kabupaten terpilih --
+  const [kecamatanOptions, setKecamatanOptions] = useState([]);
+  useEffect(() => {
+    if (filterProvinsi.length !== 1 || filterKabupaten.length !== 1) {
+      setKecamatanOptions([]);
+      return;
+    }
+    fetch(`${API_BASE}/cluster/getsubdistrict/${encodeURIComponent(filterKabupaten[0])}/`)
+      .then((res) => res.json())
+      .then((data) => setKecamatanOptions(Array.isArray(data) ? data : []))
+      .catch(() => setKecamatanOptions([]));
+  }, [filter.provinsi, filter.kabupaten]);
+
+  // -- Kelurahan/Desa: cascading dari Kabupaten + Kecamatan terpilih --
+  const [kelurahanOptions, setKelurahanOptions] = useState([]);
+  useEffect(() => {
+    if (filterKabupaten.length !== 1 || filterKecamatan.length !== 1) {
+      setKelurahanOptions([]);
+      return;
+    }
+    fetch(`${API_BASE}/cluster/getward/${encodeURIComponent(filterKabupaten[0])}/${encodeURIComponent(filterKecamatan[0])}/`)
+      .then((res) => res.json())
+      .then((data) => setKelurahanOptions(Array.isArray(data) ? data : []))
+      .catch(() => setKelurahanOptions([]));
+  }, [filter.kabupaten, filter.kecamatan]);
+
+  // Reset child selections ketika parent berubah
+  const handleProvinsiChange = (value) => {
+    setFilter({
+      ...filter,
+      provinsi: asArray(value),
+      kabupaten: [],
+      kecamatan: [],
+      kelurahan: [],
+    });
+  };
+
+  const handleKabupatenChange = (value) => {
+    setFilter({
+      ...filter,
+      kabupaten: asArray(value),
+      kecamatan: [],
+      kelurahan: [],
+    });
+  };
+
+  const handleKecamatanChange = (value) => {
+    setFilter({
+      ...filter,
+      kecamatan: asArray(value),
+      kelurahan: [],
+    });
+  };
+
+  const handleKelurahanChange = (value) => {
+  setFilter({
+    ...filter,
+    kelurahan: asArray(value),
+  });
+};
+
   return (
     <Toolbar ref={toolbarRef} className={classes.toolbar}>
       <IconButton edge="start" onClick={() => setDevicesOpen(!devicesOpen)}>
@@ -93,13 +219,19 @@ const MainToolbar = ({
               <Badge
                 color="info"
                 variant="dot"
-                invisible={!filter.statuses.length && !filter.groups.length && !filter.geofences.length}
+                invisible={
+                  !asArray(filter.statuses).length &&
+                  !asArray(filter.groups).length &&
+                  !asArray(filter.geofences).length &&
+                  !filterTahun.length &&
+                  !filterJenis.length &&
+                  !filterProvinsi.length &&
+                  !filterKabupaten.length &&
+                  !filterKecamatan.length &&
+                  !filterKelurahan.length
+                }
               >
-                <TuneIcon fontSize="small" 
-                  sx={{
-                    color: '#020000',
-                  }}
-                />
+                <TuneIcon fontSize="small" sx={{ color: '#020000' }} />
               </Badge>
             </IconButton>
           </InputAdornment>
@@ -109,7 +241,7 @@ const MainToolbar = ({
         sx={{
           backgroundColor: '#fff',
           borderRadius: 1.5,
-          '& .MuiInputBase-input': { color: '#1E3A3A !important' }, 
+          '& .MuiInputBase-input': { color: '#1E3A3A !important' },
         }}
       />
       <Popover
@@ -135,7 +267,7 @@ const MainToolbar = ({
         ))}
         {filteredDevices.length > 3 && (
           <ListItemButton alignItems="center" onClick={() => setDevicesOpen(true)}>
-            <ListItemText primary={t('notificationAlways')} style={{ textAlign: 'center' }} />
+            <MuiListItemText primary={t('notificationAlways')} style={{ textAlign: 'center' }} />
           </ListItemButton>
         )}
       </Popover>
@@ -153,7 +285,7 @@ const MainToolbar = ({
             <InputLabel>{t('deviceStatus')}</InputLabel>
             <Select
               label={t('deviceStatus')}
-              value={filter.statuses}
+              value={asArray(filter.statuses)}
               onChange={(e) => setFilter({ ...filter, statuses: e.target.value })}
               multiple
             >
@@ -162,11 +294,203 @@ const MainToolbar = ({
               <MenuItem value="unknown">{`${t('deviceStatusUnknown')} (${deviceStatusCount('unknown')})`}</MenuItem>
             </Select>
           </FormControl>
+
+
+          {/* <FormControl>
+            <InputLabel>{t('sharedGeofences')}</InputLabel>
+            <Select
+              label={t('sharedGeofences')}
+              value={asArray(filter.geofences)}
+              onChange={(e) => setFilter({ ...filter, geofences: e.target.value })}
+              multiple
+            >
+              {Object.values(geofences)
+                .sort((a, b) => a.name.localeCompare(b.name))
+                .map((geofence) => (
+                  <MenuItem key={geofence.id} value={geofence.id}>
+                    {geofence.name}
+                  </MenuItem>
+                ))}
+            </Select>
+          </FormControl> */}
+
+          {/* -- Tahun -- */}
+          <FormControl size="small" fullWidth>
+            <InputLabel
+              shrink
+              sx={{
+                position: 'static', transform: 'none', fontSize: 12, fontWeight: 600,
+                letterSpacing: 0.5, textTransform: 'uppercase', color: 'text.secondary', mb: 0.5,
+              }}
+            >
+              Tahun
+            </InputLabel>
+            <Select
+              value={filterTahun}
+              onChange={(e) => setFilter({ ...filter, tahun: e.target.value })}
+              multiple
+              displayEmpty
+              renderValue={(selected) => (asArray(selected).length === 0 ? 'Semua Tahun' : asArray(selected).sort().join(', '))}
+              sx={{ borderRadius: 2 }}
+            >
+              {tahunOptions.map((tahun) => (
+                <MenuItem key={tahun} value={tahun}>
+                  <Checkbox checked={filterTahun.indexOf(tahun) > -1} />
+                  <ListItemText primary={tahun} />
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+
+          {/* -- Jenis Alsintan -- */}
+          <FormControl size="small" fullWidth>
+            <InputLabel
+              shrink
+              sx={{
+                position: 'static', transform: 'none', fontSize: 12, fontWeight: 600,
+                letterSpacing: 0.5, textTransform: 'uppercase', color: 'text.secondary', mb: 0.5,
+              }}
+            >
+              Jenis
+            </InputLabel>
+            <Select
+              value={filterJenis}
+              onChange={(e) => setFilter({ ...filter, jenis: e.target.value })}
+              multiple
+              displayEmpty
+              renderValue={(selected) => (asArray(selected).length === 0 ? 'Semua Jenis' : asArray(selected).join(', '))}
+              sx={{ borderRadius: 2 }}
+            >
+              {jenisOptions.map((jenis) => (
+                <MenuItem key={jenis} value={jenis}>
+                  <Checkbox checked={filterJenis.indexOf(jenis) > -1} />
+                  <ListItemText primary={jenis} />
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+
+          {/* -- Provinsi -- */}
+          <FormControl size="small" fullWidth>
+            <InputLabel
+              shrink
+              sx={{
+                position: 'static', transform: 'none', fontSize: 12, fontWeight: 600,
+                letterSpacing: 0.5, textTransform: 'uppercase', color: 'text.secondary', mb: 0.5,
+              }}
+            >
+              Provinsi
+            </InputLabel>
+            <Select
+              value={filterProvinsi[0] || ''}
+              onChange={(e) => handleProvinsiChange(e.target.value ? [e.target.value] : [])}
+              displayEmpty
+              renderValue={(selected) => (selected ? selected : 'Pilih Provinsi...')}
+              sx={{ borderRadius: 2 }}
+            >
+              <MenuItem value="">
+                <em>Pilih Provinsi...</em>
+              </MenuItem>
+              {provinsiOptions.map((provinsi) => (
+                <MenuItem key={provinsi} value={provinsi}>
+                  {provinsi}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+
+          {/* -- Kabupaten/Kota -- */}
+          <FormControl size="small" fullWidth disabled={filterProvinsi.length !== 1}>
+            <InputLabel
+              shrink
+              sx={{
+                position: 'static', transform: 'none', fontSize: 12, fontWeight: 600,
+                letterSpacing: 0.5, textTransform: 'uppercase', color: 'text.secondary', mb: 0.5,
+              }}
+            >
+              Kabupaten/Kota
+            </InputLabel>
+            <Select
+              value={filterKabupaten[0] || ''}
+              onChange={(e) => handleKabupatenChange(e.target.value ? [e.target.value] : [])}
+              displayEmpty
+              renderValue={(selected) => (selected ? selected : 'Pilih Kabupaten...')}
+              sx={{ borderRadius: 2 }}
+            >
+              <MenuItem value="">
+                <em>Pilih Kabupaten...</em>
+              </MenuItem>
+              {kabupatenOptions.map((kabupaten) => (
+                <MenuItem key={kabupaten} value={kabupaten}>
+                  {kabupaten}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+
+          {/* -- Kecamatan -- */}
+          <FormControl size="small" fullWidth disabled={filterKabupaten.length !== 1}>
+            <InputLabel
+              shrink
+              sx={{
+                position: 'static', transform: 'none', fontSize: 12, fontWeight: 600,
+                letterSpacing: 0.5, textTransform: 'uppercase', color: 'text.secondary', mb: 0.5,
+              }}
+            >
+              Kecamatan
+            </InputLabel>
+            <Select
+              value={filterKecamatan[0] || ''}
+              onChange={(e) => handleKecamatanChange(e.target.value ? [e.target.value] : [])}
+              displayEmpty
+              renderValue={(selected) => (selected ? selected : 'Pilih Kecamatan...')}
+              sx={{ borderRadius: 2 }}
+            >
+              <MenuItem value="">
+                <em>Pilih Kecamatan...</em>
+              </MenuItem>
+              {kecamatanOptions.map((kecamatan) => (
+                <MenuItem key={kecamatan} value={kecamatan}>
+                  {kecamatan}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+
+          {/* -- Kelurahan/Desa -- */}
+          <FormControl size="small" fullWidth disabled={filterKecamatan.length !== 1}>
+            <InputLabel
+              shrink
+              sx={{
+                position: 'static', transform: 'none', fontSize: 12, fontWeight: 600,
+                letterSpacing: 0.5, textTransform: 'uppercase', color: 'text.secondary', mb: 0.5,
+              }}
+            >
+              Kelurahan/Desa
+            </InputLabel>
+            <Select
+              value={filterKelurahan[0] || ''}
+              onChange={(e) => handleKelurahanChange(e.target.value ? [e.target.value] : [])}
+              displayEmpty
+              renderValue={(selected) => (selected ? selected : 'Pilih Kelurahan...')}
+              sx={{ borderRadius: 2 }}
+            >
+              <MenuItem value="">
+                <em>Pilih Kelurahan...</em>
+              </MenuItem>
+              {kelurahanOptions.map((kelurahan) => (
+                <MenuItem key={kelurahan} value={kelurahan}>
+                  {kelurahan}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+
           <FormControl>
             <InputLabel>{t('settingsGroups')}</InputLabel>
             <Select
               label={t('settingsGroups')}
-              value={filter.groups}
+              value={asArray(filter.groups)}
               onChange={(e) => setFilter({ ...filter, groups: e.target.value })}
               multiple
             >
@@ -179,41 +503,10 @@ const MainToolbar = ({
                 ))}
             </Select>
           </FormControl>
-          <FormControl>
-            <InputLabel>{t('sharedGeofences')}</InputLabel>
-            <Select
-              label={t('sharedGeofences')}
-              value={filter.geofences}
-              onChange={(e) => setFilter({ ...filter, geofences: e.target.value })}
-              multiple
-            >
-              {Object.values(geofences)
-                .sort((a, b) => a.name.localeCompare(b.name))
-                .map((geofence) => (
-                  <MenuItem key={geofence.id} value={geofence.id}>
-                    {geofence.name}
-                  </MenuItem>
-                ))}
-            </Select>
-          </FormControl>
-          <FormControl>
-            <InputLabel>{t('sharedSortBy')}</InputLabel>
-            <Select
-              label={t('sharedSortBy')}
-              value={filterSort}
-              onChange={(e) => setFilterSort(e.target.value)}
-              displayEmpty
-            >
-              <MenuItem value="">{'\u00a0'}</MenuItem>
-              <MenuItem value="name">{t('sharedName')}</MenuItem>
-              <MenuItem value="lastUpdate">{t('deviceLastUpdate')}</MenuItem>
-            </Select>
-          </FormControl>
+
           <FormGroup>
             <FormControlLabel
-              control={
-                <Checkbox checked={filterMap} onChange={(e) => setFilterMap(e.target.checked)} />
-              }
+              control={<Checkbox checked={filterMap} onChange={(e) => setFilterMap(e.target.checked)} />}
               label={t('sharedFilterMap')}
             />
           </FormGroup>
