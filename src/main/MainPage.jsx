@@ -1,4 +1,4 @@
-import { lazy, Suspense, useState, useCallback, useEffect } from 'react';
+import { lazy, Suspense, useState, useCallback, useEffect, useMemo } from 'react';
 import { Paper } from '@mui/material';
 import { makeStyles } from 'tss-react/mui';
 import { useTheme } from '@mui/material/styles';
@@ -79,6 +79,21 @@ const MainPage = () => {
   const mapOnSelect = useAttributePreference('mapOnSelect', true);
 
   const selectedDeviceId = useSelector((state) => state.devices.selectedId);
+  const sessionUser = useSelector((state) => state.session.user);
+
+  const regionLock = useMemo(() => {
+    const attrs = sessionUser?.attributes || {};
+    const level = attrs.WILAYAH_LEVEL;
+    if (!level) return null;
+    return {
+      level,
+      provinsi: attrs.PROVINSI || null,
+      kabupaten: attrs.KABUPATEN_KOTA || null,
+      kecamatan: attrs.KECAMATAN || null,
+      kelurahan: attrs.KELURAHAN || null,
+    };
+  }, [sessionUser]);
+
   const positions = useSelector((state) => state.session.positions);
   const [filteredPositions, setFilteredPositions] = useState([]);
   const selectedPosition = filteredPositions.find(
@@ -87,11 +102,6 @@ const MainPage = () => {
 
   const [filteredDevices, setFilteredDevices] = useState([]);
   const [keyword, setKeyword] = useState('');
-  // const [filter, setFilter] = usePersistedState('deviceFilter', {
-  //   statuses: [],
-  //   groups: [],
-  //   geofences: [],
-  // });
   const [filter, setFilter] = usePersistedState('deviceFilter', {
   statuses: [],
   groups: [],
@@ -104,7 +114,7 @@ const MainPage = () => {
   kelurahan: [],
 });
   const [filterSort, setFilterSort] = usePersistedState('filterSort', '');
-  const [filterMap, setFilterMap] = usePersistedState('filterMap', false);
+  const [filterMap, setFilterMap] = usePersistedState('filterMap', true);
 
   const [devicesOpen, setDevicesOpen] = useState(false);
   const [eventsOpen, setEventsOpen] = useState(false);
@@ -119,6 +129,18 @@ const MainPage = () => {
       setDevicesOpen(false);
     }
   }, [desktop, mapOnSelect, selectedDeviceId]);
+
+  useEffect(() => {
+  if (!regionLock) return;
+  setFilter((prev) => ({
+    ...prev,
+    provinsi: regionLock.provinsi ? [regionLock.provinsi] : prev.provinsi,
+    kabupaten: regionLock.kabupaten ? [regionLock.kabupaten] : prev.kabupaten,
+    kecamatan: regionLock.kecamatan ? [regionLock.kecamatan] : prev.kecamatan,
+    kelurahan: regionLock.kelurahan ? [regionLock.kelurahan] : prev.kelurahan,
+  }));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+}, [regionLock]);
 
   useFilter(
     keyword,
@@ -171,6 +193,7 @@ const MainPage = () => {
             setFilterSort={setFilterSort}
             filterMap={filterMap}
             setFilterMap={setFilterMap}
+            regionLock={regionLock}
           />
         </Paper>
         <div className={classes.middle}>

@@ -8,8 +8,8 @@ export default defineConfig(() => ({
   server: {
     port: 3000,
     proxy: {
-      '/api/socket': 'ws://103.228.8.184:8082',
-      '/api': 'http://103.228.8.184:8082',
+      '/api/socket': 'wss://v1.garudatrack.id',
+      '/api': 'https://v1.garudatrack.id',
     },
   },
   build: {
