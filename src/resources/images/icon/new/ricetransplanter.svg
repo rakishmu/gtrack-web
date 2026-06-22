@@ -1,0 +1,19 @@
+<svg width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+  <g fill="#000000">
+    <!-- handle -->
+    <rect x="27" y="8" width="2.2" height="10" rx="1.1"/>
+    <rect x="22" y="8" width="7.5" height="2.1" rx="1"/>
+    <!-- seedling tray (angled, behind) -->
+    <path d="M5 14 l11 -3 v8 l-11 3 z"/>
+    <rect x="7" y="13.5" width="2" height="6" fill="#ffffff"/>
+    <rect x="11" y="12.6" width="2" height="6" fill="#ffffff"/>
+    <!-- main body -->
+    <rect x="15" y="17" width="14" height="6" rx="1.4"/>
+    <!-- planting fingers row -->
+    <rect x="13" y="23" width="3" height="4" rx="1"/>
+    <rect x="18" y="23" width="3" height="4" rx="1"/>
+    <rect x="23" y="23" width="3" height="4" rx="1"/>
+    <!-- float skids -->
+    <path d="M9 30 h22 a1.6 1.6 0 0 1 1.6 1.6 v0.4 h-25.2 v-0.4 a1.6 1.6 0 0 1 1.6 -1.6 z"/>
+  </g>
+</svg>

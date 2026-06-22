@@ -1,7 +1,7 @@
 import { grey } from '@mui/material/colors';
 import { createTheme } from '@mui/material';
 import { loadImage, prepareIcon } from './mapUtil';
-
+ 
 import directionSvg from '../../resources/images/direction.svg';
 import backgroundSvg from '../../resources/images/background.svg';
 import animalSvg from '../../resources/images/icon/animal.svg';
@@ -27,6 +27,14 @@ import tramSvg from '../../resources/images/icon/tram.svg';
 import truckSvg from '../../resources/images/icon/truck.svg';
 import vanSvg from '../../resources/images/icon/van.svg';
 
+import tractor2wheelSvg from '../../resources/images/icon/new/tractor2wheel.svg';
+import waterpumpSvg from '../../resources/images/icon/new/waterpump.svg';
+import tractor4wheelSvg from '../../resources/images/icon/new/tractor4wheel.svg';
+import tractorcrawlerSvg from '../../resources/images/icon/new/tractorcrawler.svg';
+import combineharvesterSvg from '../../resources/images/icon/new/combineharvester.svg';
+import ricetransplanterSvg from '../../resources/images/icon/new/ricetransplanter.svg';
+import agridroneSvg from '../../resources/images/icon/new/agridrone.svg';
+
 export const mapIcons = {
   animal: animalSvg,
   bicycle: bicycleSvg,
@@ -50,6 +58,13 @@ export const mapIcons = {
   tram: tramSvg,
   truck: truckSvg,
   van: vanSvg,
+  tractor2wheel: tractor2wheelSvg,
+  waterpump: waterpumpSvg,
+  tractor4wheel: tractor4wheelSvg,
+  tractorcrawler: tractorcrawlerSvg,
+  combineharvester: combineharvesterSvg,
+  ricetransplanter: ricetransplanterSvg,
+  agridrone: agridroneSvg,
 };
 
 export const mapIconKey = (category) => {

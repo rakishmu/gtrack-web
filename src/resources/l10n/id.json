@@ -656,5 +656,12 @@
     "categoryVan": "Van",
     "categoryScooter": "Scooter",
     "maintenanceStart": "Start",
-    "maintenancePeriod": "Period"
+    "maintenancePeriod": "Period",
+    "categoryTractor2wheel": "Traktor Roda 2",
+    "categoryWaterpump": "Pompa Air",
+    "categoryTractor4wheel": "Traktor Roda 4",
+    "categoryTractorcrawler": "Traktor Roda Crawler",
+    "categoryCombineharvester": "Combine Harvester Besar",
+    "categoryRicetransplanter": "Rice Transplanter",
+    "categoryAgridrone": "Drone Pertanian"
 }
