@@ -71,6 +71,7 @@ const MainToolbar = ({
   setFilterSort,
   filterMap,
   setFilterMap,
+  regionLock,
 }) => {
   const { classes } = useStyles();
   const theme = useTheme();
@@ -91,7 +92,6 @@ const MainToolbar = ({
   const deviceStatusCount = (status) =>
     Object.values(devices).filter((d) => d.status === status).length;
 
-  // Normalisasi field region/array supaya selalu array, dipakai di seluruh komponen
   const filterTahun = asArray(filter.tahun);
   const filterJenis = asArray(filter.jenis);
   const filterProvinsi = asArray(filter.provinsi);
@@ -99,10 +99,15 @@ const MainToolbar = ({
   const filterKecamatan = asArray(filter.kecamatan);
   const filterKelurahan = asArray(filter.kelurahan);
 
-  // -- Tahun: statis 2024 s/d tahun berjalan --
+  const levels = ['PROVINSI', 'KABUPATEN_KOTA', 'KECAMATAN', 'KELURAHAN'];
+  const lockIndex = regionLock ? levels.indexOf(regionLock.level) : -1;
+  const isProvinsiLocked = lockIndex >= 0;
+  const isKabupatenLocked = lockIndex >= 1;
+  const isKecamatanLocked = lockIndex >= 2;
+  const isKelurahanLocked = lockIndex >= 3;
+
   const tahunOptions = useMemo(() => getYearOptions(2024), []);
 
-  // -- Jenis Alsintan: dari API --
   const [jenisOptions, setJenisOptions] = useState([]);
   useEffect(() => {
     fetch(`${API_BASE}/cards/jenisalsintan`)
@@ -371,7 +376,7 @@ const MainToolbar = ({
           </FormControl>
 
           {/* -- Provinsi -- */}
-          <FormControl size="small" fullWidth>
+          <FormControl size="small" fullWidth disabled={isProvinsiLocked}>
             <InputLabel
               shrink
               sx={{
@@ -400,7 +405,7 @@ const MainToolbar = ({
           </FormControl>
 
           {/* -- Kabupaten/Kota -- */}
-          <FormControl size="small" fullWidth disabled={filterProvinsi.length !== 1}>
+          <FormControl size="small" fullWidth disabled={isKabupatenLocked || filterProvinsi.length !== 1}>
             <InputLabel
               shrink
               sx={{
@@ -429,7 +434,7 @@ const MainToolbar = ({
           </FormControl>
 
           {/* -- Kecamatan -- */}
-          <FormControl size="small" fullWidth disabled={filterKabupaten.length !== 1}>
+          <FormControl size="small" fullWidth disabled={isKecamatanLocked || filterKabupaten.length !== 1}>
             <InputLabel
               shrink
               sx={{
@@ -458,7 +463,7 @@ const MainToolbar = ({
           </FormControl>
 
           {/* -- Kelurahan/Desa -- */}
-          <FormControl size="small" fullWidth disabled={filterKecamatan.length !== 1}>
+          <FormControl size="small" fullWidth disabled={isKelurahanLocked || filterKecamatan.length !== 1}>
             <InputLabel
               shrink
               sx={{
