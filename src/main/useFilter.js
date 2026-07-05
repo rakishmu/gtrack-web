@@ -48,16 +48,13 @@ export default (
     const filterKelurahan = filter.kelurahan || [];
 
     const filtered = Object.values(devices)
-      // 1. Filter Status bawaan Traccar
       .filter((device) => !filter.statuses.length || filter.statuses.includes(device.status))
 
-      // 2. Filter Grup bawaan Traccar
       .filter(
         (device) =>
           !filter.groups.length || (groups && deviceGroups(device).some((id) => filter.groups.includes(id))),
       )
 
-      // 3. FILTER WILAYAH ADMINISTRATIF GARUDA TRACK (DENGAN BYPASS PROTEKSI)
       .filter((device) => {
         if (!targetRegionId || targetRegionId === 0) {
           return true;
@@ -65,27 +62,23 @@ export default (
         return deviceGroups(device).includes(targetRegionId);
       })
 
-      // 4. Filter Geofences bawaan Traccar
       .filter(
         (device) =>
           !filter.geofences.length ||
           (positions[device.id]?.geofenceIds || []).some((id) => filter.geofences.includes(id)),
       )
 
-      // 5. Filter Tahun (attributes.YEAR)
       .filter((device) => {
         if (!filterTahun.length) return true;
         return filterTahun.includes(device.attributes?.YEAR);
       })
 
-      // 6. Filter Jenis Alsintan
       .filter((device) => {
         if (!filterJenis.length) return true;
         const haystack = `${device.attributes?.JENIS || ''} ${device.name || ''}`.toUpperCase();
         return filterJenis.some((jenis) => haystack.includes(jenis.toUpperCase()));
       })
 
-      // 7. Filter Provinsi (attributes.PROVINSI)
       .filter((device) => {
         if (!filterProvinsi.length) return true;
         return filterProvinsi.includes(device.attributes?.PROVINSI);

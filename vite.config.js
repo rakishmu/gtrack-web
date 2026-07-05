@@ -22,8 +22,11 @@ export default defineConfig(() => ({
     VitePWA({
       includeAssets: ['favicon.ico', 'apple-touch-icon-180x180.png'],
       workbox: {
-        navigateFallbackDenylist: [/^\/api/],
+        navigateFallbackDenylist: [/^\/api/, /^\/dashboard/],
         globPatterns: ['**/*.{js,css,html,woff,woff2,mp3}'],
+        // Jangan precache bundle dashboard yang di-embed: biar iframe selalu
+        // ambil versi terbaru dari jaringan (hindari header/konten basi).
+        globIgnores: ['**/dashboard/**'],
       },
       manifest: {
         short_name: 'GTrack',

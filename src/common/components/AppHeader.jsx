@@ -3,6 +3,7 @@ import { useSelector } from 'react-redux';
 import { AppBar, Toolbar, Box, Typography, FormControl, Select, MenuItem } from '@mui/material';
 import AutorenewIcon from '@mui/icons-material/Autorenew';
 import logo from '../../../public/logo.webp';
+import BottomMenu from './BottomMenu';
 
 // Gradient memudar ke terang di kanan supaya judul gelap tetap terbaca.
 const LEFT_TEAL = 'linear-gradient(110deg,#1E8C86 0%,#2BA8A2 45%,#5DC9C2 75%,#CFEDEA 100%)';
@@ -128,6 +129,20 @@ const AppHeader = ({ onRegionChange }) => {
             <RegionSelect label="Kecamatan" value={kecamatan} items={listKecamatan} disabled={!kabupaten} onChange={(e) => handleRegionChange('kecamatan', e.target.value)} />
             <RegionSelect label="Kelurahan" value={kelurahan} items={listKelurahan} disabled={!kecamatan} onChange={(e) => handleRegionChange('kelurahan', e.target.value)} />
           </Box> */}
+
+          {/* Navigasi utama (dipindah dari menu bawah) — tampil di layar md+ */}
+          <Box sx={{ display: { xs: 'none', md: 'flex' }, alignItems: 'center' }}>
+            <BottomMenu variant="header" />
+            <Box
+              sx={{
+                width: '1px',
+                alignSelf: 'stretch',
+                mx: 1,
+                my: 0.5,
+                backgroundColor: 'rgba(30,140,134,0.25)',
+              }}
+            />
+          </Box>
 
           <Box
             sx={{
