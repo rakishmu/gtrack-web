@@ -231,6 +231,29 @@ const MainPage = () => {
   const scrollToSection = (ref) =>
     ref.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
+  // Section dashboard yang diminta sebelum iframe siap (mis. iframe belum
+  // dimuat karena masih di luar viewport) — dikirim ulang saat handshake
+  // "gtrack:ready" diterima, lihat listener message di bawah.
+  const pendingSectionRef = useRef(null);
+
+  const goToDashboardSection = useCallback(
+    (sectionId) => {
+      scrollToSection(dashSectionRef);
+      const win = dashFrameRef.current?.contentWindow;
+      if (dashLoaded && win) {
+        win.postMessage({ type: 'gtrack:scrollToSection', id: sectionId }, window.location.origin);
+      } else {
+        pendingSectionRef.current = sectionId;
+      }
+    },
+    [dashLoaded],
+  );
+
+  const goToPurnaJual = useCallback(
+    () => goToDashboardSection('sec-purna'),
+    [goToDashboardSection],
+  );
+
   const onEventsClick = useCallback(() => setEventsOpen(true), [setEventsOpen]);
 
   useEffect(() => {
@@ -287,10 +310,18 @@ const MainPage = () => {
     const onMessage = (e) => {
       if (e.origin !== window.location.origin) return;
       if (e.data?.type === 'gtrack:ready') {
-        dashFrameRef.current?.contentWindow?.postMessage(
+        const win = dashFrameRef.current?.contentWindow;
+        win?.postMessage(
           { type: 'gtrack:filter', payload: dashboardFilter },
           window.location.origin,
         );
+        if (pendingSectionRef.current) {
+          win?.postMessage(
+            { type: 'gtrack:scrollToSection', id: pendingSectionRef.current },
+            window.location.origin,
+          );
+          pendingSectionRef.current = null;
+        }
       } else if (e.data?.type === 'gtrack:scrollToMap') {
         scrollToSection(mapSectionRef);
       }
@@ -349,6 +380,7 @@ const MainPage = () => {
                 filterMap={filterMap}
                 setFilterMap={setFilterMap}
                 regionLock={regionLock}
+                onGoToPurnaJual={goToPurnaJual}
               />
             </Paper>
             <div className={classes.middle}>

@@ -72,6 +72,7 @@ const MainToolbar = ({
   filterMap,
   setFilterMap,
   regionLock,
+  onGoToPurnaJual,
 }) => {
   const { classes } = useStyles();
   const theme = useTheme();
@@ -88,6 +89,7 @@ const MainToolbar = ({
   const inputRef = useRef();
   const [filterAnchorEl, setFilterAnchorEl] = useState(null);
   const [devicesAnchorEl, setDevicesAnchorEl] = useState(null);
+  const [purnaJualChecked, setPurnaJualChecked] = useState(false);
 
   const deviceStatusCount = (status) =>
     Object.values(devices).filter((d) => d.status === status).length;
@@ -513,6 +515,26 @@ const MainToolbar = ({
             <FormControlLabel
               control={<Checkbox checked={filterMap} onChange={(e) => setFilterMap(e.target.checked)} />}
               label={t('sharedFilterMap')}
+            />
+          </FormGroup>
+
+          {/* Pintasan ke peta Purna Jual di dashboard, mengikuti filter wilayah aktif saat ini */}
+          <FormGroup>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={purnaJualChecked}
+                  onChange={(e) => {
+                    const checked = e.target.checked;
+                    setPurnaJualChecked(checked);
+                    if (checked) {
+                      setFilterAnchorEl(null);
+                      onGoToPurnaJual?.();
+                    }
+                  }}
+                />
+              }
+              label="Purna Jual"
             />
           </FormGroup>
         </div>
