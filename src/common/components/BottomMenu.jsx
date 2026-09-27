@@ -10,6 +10,7 @@ import {
   Typography,
   Badge,
   Button,
+  Box,
 } from '@mui/material';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 
@@ -29,7 +30,7 @@ import { nativePostMessage } from './NativeInterface';
 
 const DASHBOARD_URL ='https://dashboard.garudatrack.id';
 
-const BottomMenu = () => {
+const BottomMenu = ({ variant = 'bottom' }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const dispatch = useDispatch();
@@ -145,6 +146,62 @@ const BottomMenu = () => {
     (window.top ?? window).location.href = DASHBOARD_URL;
   }
 
+  // Varian header: navigasi ringkas untuk dipasang di kanan atas AppHeader,
+  // di samping indikator LIVE. Latar transparan, warna teal agar cocok header putih.
+  if (variant === 'header') {
+    const items = [
+      { value: 'map', label: t('mapTitle'), icon: <MapIcon />, dot: socket === false },
+      // { value: 'dashboard', label: t('reportTitle'), icon: <DashboardIcon /> },
+      { value: 'command', label: 'Command', icon: <SmsIcon /> },
+      { value: 'users', label: 'Users', icon: <GroupIcon /> },
+      { value: 'reports', label: 'Reports', icon: <DescriptionIcon /> },
+      { value: 'logout', label: t('loginLogout'), icon: <ExitToAppIcon /> },
+    ];
+    const current = currentSelection();
+    return (
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.25 }}>
+        {items.map((it) => {
+          const selected = current === it.value;
+          return (
+            <Box
+              key={it.value}
+              component="button"
+              type="button"
+              onClick={(e) => handleSelection(e, it.value)}
+              sx={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '2px',
+                minWidth: 56,
+                px: 1,
+                py: 0.5,
+                border: 0,
+                borderRadius: 2,
+                cursor: 'pointer',
+                fontFamily: 'inherit',
+                fontSize: 11,
+                lineHeight: 1.1,
+                background: selected ? 'rgba(43,168,162,0.14)' : 'transparent',
+                color: selected ? '#1E8C86' : '#3F5C5C',
+                fontWeight: selected ? 700 : 500,
+                transition: 'all .2s',
+                '&:hover': { background: 'rgba(43,168,162,0.10)', color: '#1E8C86' },
+                '& .MuiSvgIcon-root': { fontSize: 20 },
+              }}
+            >
+              <Badge color="error" variant="dot" overlap="circular" invisible={!it.dot}>
+                {it.icon}
+              </Badge>
+              {it.label}
+            </Box>
+          );
+        })}
+      </Box>
+    );
+  }
+
   return (
     <Paper square elevation={3} sx={{ background: 'linear-gradient(135deg,#1E8C86 0%,#2BA8A2 60%,#3CC4BD 100%)' }}>
       <BottomNavigation
@@ -183,11 +240,11 @@ const BottomMenu = () => {
           }
           value="map"
         />
-        <BottomNavigationAction
+        {/* <BottomNavigationAction
           label={t('reportTitle')}
           icon={<DashboardIcon />}
           value="dashboard"
-        />
+        /> */}
         <BottomNavigationAction
           label='Command'
           icon={<SmsIcon />}
